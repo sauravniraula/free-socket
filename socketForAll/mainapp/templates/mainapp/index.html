@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <title>free socket</title>
+</head>
+
+<body>
+    <div class="index-main">
+        <h1>circle</h1>
+        <div id="inject" style="height:80vw;width:80vw;"></div>
+        <h1>integer</h1>
+        <h2 id="integer"></h2>
+        <h1>string</h1>
+        <h2 id="string"></h2>
+    </div>
+</body>
+<script>
+
+    var x = []
+    var y = []
+
+    const circleSocket = new WebSocket(
+        'ws://' +
+        window.location.host +
+        '/random/'
+    )
+
+    const integerSocket = new WebSocket(
+        'ws://' +
+        window.location.host +
+        '/random/'
+    )
+
+    const stringSocket = new WebSocket(
+        'ws://' +
+        window.location.host +
+        '/random/'
+    )
+    
+    stringSocket.onopen = () => {
+        console.log("String socket created!")
+        stringSocket.send(JSON.stringify({
+            type: 'init',
+            data_type: 'string',
+            length: 20
+        }))
+    }
+    
+    stringSocket.onmessage = (message) => {
+        data = JSON.parse(message.data)
+        document.getElementById("string").innerHTML = data.message
+    }
+    
+
+    integerSocket.onopen = () => {
+        console.log("Integer socket created!")
+        integerSocket.send(JSON.stringify({
+            type: 'init',
+            data_type: 'integer',
+            max: 200,
+            min: 100
+        }))
+    }
+    
+    integerSocket.onmessage = (message) => {
+        data = JSON.parse(message.data)
+        document.getElementById("integer").innerHTML = data.message
+    }
+
+    circleSocket.onopen = () => {
+        console.log("Circle socket created!")
+        circleSocket.send(JSON.stringify({
+            type: 'init',
+            geometry: 'circle',
+            radius: 100,
+            center: [100, 100],
+            speed: 5
+        }))
+    }
+
+    circleSocket.onmessage = (message) => {
+        data = JSON.parse(message.data)
+        x.push(data.message[0])
+        y.push(data.message[1])
+        Plotly.newPlot(document.getElementById('inject'),
+            [{
+                x,
+                y,
+                mode: 'markers',
+                type: 'scatter'
+            }]
+        )
+    }
+
+</script>
+
+</html>
